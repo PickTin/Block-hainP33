@@ -10,15 +10,18 @@ namespace BlockChainP33
     {
         public string ComputeBlockHash(Block block)
         {
-            // Формуємо рядок транзакцій
-            var stringTransactionRaw = string.Concat(
+            // Формуємо рядок транзакцій разом із публічними ключами та підписами.
+            // Роздільник запобігає неоднозначному склеюванню сусідніх значень.
+            var stringTransactionRaw = string.Join(
+                "||",
                 block.Transactions.Select(t => t.ToRawString())
             );
 
-            // Формуємо дані блоку для хешування
+            // Data входить до хешу, щоб будь-яка зміна події в блоці
+            // автоматично порушувала перевірку цілісності блокчейну.
             var blockData =
-                $"{block.Index}{block.PrevHash}{block.TimeStamp}" +
-                $"{stringTransactionRaw}{block.Author}{block.Nonce}{block.Difficulty}";
+                $"{block.Index}|{block.Data}|{block.PrevHash}|{block.TimeStamp:O}|" +
+                $"{stringTransactionRaw}|{block.Author}|{block.Nonce}|{block.Difficulty}";
 
             return ComputeHash(blockData);
         }
@@ -43,3 +46,4 @@ namespace BlockChainP33
         }
     }
 }
+
